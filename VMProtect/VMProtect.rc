@@ -1,0 +1,195 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 中文(简体，中国) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""winres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_MAIN_DIALOG DIALOGEX 0, 0, 383, 162
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_CHILD
+EXSTYLE WS_EX_ACCEPTFILES
+MENU IDR_MENU1
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_SHOW_EDIT,3,42,356,106,ES_MULTILINE | ES_AUTOHSCROLL | WS_DISABLED,WS_EX_ACCEPTFILES
+    EDITTEXT        IDC_PATH_PATH,9,11,265,19,ES_AUTOHSCROLL | WS_DISABLED
+    PUSHBUTTON      "...",IDC_OPEN_BUTTON,281,13,21,14
+    PUSHBUTTON      "编译",IDC_PRO_BUTTON,311,12,41,16
+    GROUPBOX        "",IDC_STATIC,3,1,355,35
+    LTEXT           "Author:断水流大师兄",IDC_STATIC,286,150,79,11
+END
+
+IDD_TAB_DIALOG DIALOGEX 0, 0, 365, 178
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_ACCEPTFILES
+CAPTION "VMP_1.0(32位)"
+MENU IDR_MENU1
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_TAB1,"SysTabControl32",0x0,0,0,365,175
+END
+
+IDD_OPT_DIALOG DIALOGEX 0, 0, 378, 166
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_EDIT_ADDR,4,30,45,132,ES_MULTILINE | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_ASSEM,52,30,306,132,ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | WS_VSCROLL
+    EDITTEXT        IDC_EDIT_INPUT,89,11,168,16,ES_AUTOHSCROLL
+    PUSHBUTTON      "添加",IDC_BUTTON_ADD,266,11,39,14
+    PUSHBUTTON      "查看反汇编",IDC_BUTTON_ASSEM,310,11,45,14
+    LTEXT           "输入函数地址：",IDC_STATIC,26,13,59,11
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_MAIN_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 380
+        TOPMARGIN, 1
+    END
+
+    IDD_TAB_DIALOG, DIALOG
+    BEGIN
+        RIGHTMARGIN, 361
+        VERTGUIDE, 343
+        BOTTOMMARGIN, 175
+    END
+
+    IDD_OPT_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 373
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 162
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_MAIN_DIALOG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_TAB_DIALOG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_OPT_DIALOG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON_LT             ICON                    "五星.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU1 MENU
+BEGIN
+    POPUP "文件"
+    BEGIN
+        MENUITEM "打开",                          ID_40003
+        MENUITEM "PE查看器",                       ID_40004
+        MENUITEM "退出",                          ID_40005
+    END
+    POPUP "帮助"
+    BEGIN
+        MENUITEM "关于",                          ID_40006
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BITMAP1             BITMAP                  "bitmap1.bmp"
+
+#endif    // 中文(简体，中国) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
