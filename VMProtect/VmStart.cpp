@@ -346,7 +346,7 @@ void testprofunc(char* path, vector<DWORD>temp_addr)
 
 
     //还原成源文件大小
-    char* filebuff = pe.ImageBuff_To_FileBuff((char*)StretchAddr, peinfo.FileSize);
+    char* filebuff = pe.ImageBuff_To_FileBuff((char*)StretchAddr, &peinfo.FileSize);
 
 
     //新节的大小

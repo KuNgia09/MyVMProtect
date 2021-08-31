@@ -40,11 +40,13 @@ void Pack::StartProtect(HWND hwndDlg, TCHAR* strPath, TCHAR* NewFileBuff, PEInfo
 	//1.4 获取IAT表信息和重定位信息
 	getinfo((char*)TempBuff);
 
+
+	DWORD strip_length;
 	//1.5 把拉伸的文件还原成磁盘大小
-	ULONG_PTR TempBuff_1 = (ULONG_PTR)pe.ImageBuff_To_FileBuff((char*)TempBuff, peinfo.FileSize);
+	ULONG_PTR TempBuff_1 = (ULONG_PTR)pe.ImageBuff_To_FileBuff((char*)TempBuff, &strip_length);
 
 	//1.6 更新peinfo信息
-	pe.GetPEInformation_1((char*)TempBuff_1, &peinfo, peinfo.FileSize);
+	pe.GetPEInformation_1((char*)TempBuff_1, &peinfo, strip_length);
 
 	//1.7 加密代码段
 	DWORD dwVirtualAddr = XorCode(byXor, peinfo);
@@ -114,9 +116,12 @@ void Pack::StartProtect(HWND hwndDlg, TCHAR* strPath, TCHAR* NewFileBuff, PEInfo
 	MODULEINFO modinfo = { 0 };
 	GetModuleInformation(GetCurrentProcess(), hModule, &modinfo, sizeof(MODULEINFO));
 	pstcParam->dwIATBaseRVA = peinfo.SizeofImage + modinfo.SizeOfImage;
+
 	PBYTE lpMod = m_alloc.auto_malloc<PBYTE>(modinfo.SizeOfImage);
+	//拷贝Stub.dll的镜像内存到lpMod
 	memcpy_s(lpMod, modinfo.SizeOfImage, hModule, modinfo.SizeOfImage);
 	PEInfo stubpeinfo;
+
 	pe.GetPEInformation_1((char*)lpMod, &stubpeinfo);
 
 
@@ -126,6 +131,7 @@ void Pack::StartProtect(HWND hwndDlg, TCHAR* strPath, TCHAR* NewFileBuff, PEInfo
 
 	if (value != 0)
 	{
+		//给Stub.dll添加重定位
 		pe.PerformBaseRelocation((ULONG_PTR)lpMod, value);
 	}
 
@@ -136,10 +142,10 @@ void Pack::StartProtect(HWND hwndDlg, TCHAR* strPath, TCHAR* NewFileBuff, PEInfo
 	pe.addSeciton(peinfo.FileBuffer, stubpeinfo.SizeofImage, (char*)".vmp0");
 
 	//2.3.5 去掉Stub.dll的PE特征
-	for (int i = 0; i < 0x380; i++)
+	/*for (int i = 0; i < 0x380; i++)
 	{
 		*(char*)(stubpeinfo.FileBuffer + i) ^=  (0x15+rand()%1000);
-	}
+	}*/
 
 
 	/*----------------------------------------------------------------------------------*/
@@ -454,6 +460,9 @@ PBYTE Pack::MergeSection(PEInfo peinfo, PEInfo stubpeinfo, PBYTE lpMod, BYTE byX
 		pe.addSeciton(peinfo.FileBuffer, dwIATSize, (char*)".vmp1");
 	}
 
+	//获取最后一个区段的偏移和大小
+
+
 	//2、 申请新内存合并目标PE和Stub.dll
 	//因为文件可能有附加数据 文件真正大小可能没有文件对齐
 	ULONG_PTR TarFileSize = pe.AlignSize(peinfo.FileSize, peinfo.OptionalHeader->FileAlignment);//被加壳程序对齐后的文件大小
@@ -462,7 +471,9 @@ PBYTE Pack::MergeSection(PEInfo peinfo, PEInfo stubpeinfo, PBYTE lpMod, BYTE byX
 	PBYTE NewBuffer = m_allocMemory.auto_malloc<PBYTE>(TotalSize + 10);
 	memset(NewBuffer, 0, TotalSize + 10);
 
+	// 第一步拷贝peinfo
 	memcpy_s(NewBuffer, peinfo.FileSize, (char*)peinfo.FileBuffer, peinfo.FileSize);
+	//第二部拷贝Stub dll 内容
 	memcpy_s(NewBuffer + TarFileSize, stubpeinfo.SizeofImage, lpMod, stubpeinfo.SizeofImage);
 
 	//3、如果选择了加密IAT，则把IAT数据到拷贝 '.vmp1' 节
@@ -473,6 +484,7 @@ PBYTE Pack::MergeSection(PEInfo peinfo, PEInfo stubpeinfo, PBYTE lpMod, BYTE byX
 	}
 	ULONG_PTR dwIATBaseRVA = TarFileSize + stubpeinfo.SizeofImage;
 
+	// 拷贝MYIMPORT结构信息
 	memcpy_s(NewBuffer + dwIATBaseRVA,
 		dwIATSize, m_pMyImport, m_dwNumOfIATFuns * sizeof(MYIMPORT));
 
@@ -485,6 +497,7 @@ PBYTE Pack::MergeSection(PEInfo peinfo, PEInfo stubpeinfo, PBYTE lpMod, BYTE byX
 		}
 	}
 
+	//拷贝模块名
 	memcpy_s(NewBuffer + dwIATBaseRVA + m_dwNumOfIATFuns * sizeof(MYIMPORT),
 		dwIATSize, m_pModNameBuf, m_dwSizeOfModBuf);
 
@@ -497,6 +510,7 @@ PBYTE Pack::MergeSection(PEInfo peinfo, PEInfo stubpeinfo, PBYTE lpMod, BYTE byX
 		}
 	}
 
+	//拷贝函数名
 	memcpy_s(NewBuffer + dwIATBaseRVA + m_dwNumOfIATFuns * sizeof(MYIMPORT) + m_dwSizeOfModBuf,
 		dwIATSize, m_pFunNameBuf, m_dwSizeOfFunBuf);
 

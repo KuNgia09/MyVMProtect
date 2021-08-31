@@ -244,7 +244,7 @@ POINTER_TYPE PE::StretchFile(POINTER_TYPE pFileBuff, DWORD FileSize)
 *※※*	Parameter_5:
 *※※*	Author:		    LCH
 */////////////////////////////////////////////////////////////////;
-char* PE::ImageBuff_To_FileBuff(char* imgbuffer, DWORD length)
+char* PE::ImageBuff_To_FileBuff(char* imgbuffer, DWORD* strip_length)
 {
 	char* pFileBuffer = NULL;
 	//LPVOID pImageBuffer = NULL;
@@ -255,27 +255,29 @@ char* PE::ImageBuff_To_FileBuff(char* imgbuffer, DWORD length)
 
 	PIMAGE_SECTION_HEADER pSec_temp;
 
+	int temp_length;
+
 	//计算还原后文件的大小( = 计算最后一节的文件偏移 + 文件对齐后的大小)
-	//for (int i = 0; i < pNtHeader->FileHeader.NumberOfSections; i++)
-	//{
-	//	pSec_temp = pSectionHeader + i;
-	//	if (pNtHeader->FileHeader.NumberOfSections - 1 == i) {
-	//		int temp_length = pSec_temp->PointerToRawData + pSec_temp->SizeOfRawData;//更新文件的长度
-	//		
-	//	}
-	//		
-	//		
-	//}
+	for (int i = 0; i < pNtHeader->FileHeader.NumberOfSections; i++)
+	{
+		pSec_temp = pSectionHeader + i;
+		if (pNtHeader->FileHeader.NumberOfSections - 1 == i) {
+			temp_length = pSec_temp->PointerToRawData + pSec_temp->SizeOfRawData;//更新文件的长度
+			*strip_length= AlignSize(temp_length, OptionalHeader->FileAlignment);
+		}
+			
+			
+	}
 	
 	
 	//pFileBuffer = new char[length];
-	pFileBuffer = m_alloc.auto_malloc<CHAR*>(length);
+	pFileBuffer = m_alloc.auto_malloc<CHAR*>(*strip_length);
 	if (pFileBuffer == NULL)
 	{
 		printf("内存申请失败!");
 		return 0;
 	}
-	memset(pFileBuffer, 0, length);
+	memset(pFileBuffer, 0, *strip_length);
 	memcpy(pFileBuffer, imgbuffer, OptionalHeader->SizeOfHeaders);
 	for (int i = 0; i < pNtHeader->FileHeader.NumberOfSections; i++, pSectionHeader++)
 	{

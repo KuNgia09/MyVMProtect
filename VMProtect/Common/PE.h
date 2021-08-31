@@ -125,7 +125,7 @@ public:
 	*¡ù¡ù*	Parameter_5:
 	*¡ù¡ù*	Author:		    LCH
 	*/////////////////////////////////////////////////////////////////;
-	char* ImageBuff_To_FileBuff(char* imgbuffer, DWORD length);
+	char* ImageBuff_To_FileBuff(char* imgbuffer, DWORD* length);
 
 
 
