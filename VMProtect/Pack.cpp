@@ -210,7 +210,14 @@ DWORD Pack::XorCode(BYTE byXOR, PEInfo peinfo)
 	PBYTE pBase = (PBYTE)(Temp->PointerToRawData + (ULONGLONG)peinfo.FileBuffer);
 
 	//做异或运算加密
-	for (int i = 0; i < peinfo.SizeOfCode; i++)
+	/*for (int i = 0; i < peinfo.SizeOfCode; i++)
+	{
+		pBase[i] ^= byXOR;
+	}*/
+
+	peinfo.SizeOfCode = Temp->SizeOfRawData;
+	//这里不取peinfo.SizeOfCode 取SizeOfRawData 
+	for (int i = 0; i < Temp->SizeOfRawData; i++)
 	{
 		pBase[i] ^= byXOR;
 	}

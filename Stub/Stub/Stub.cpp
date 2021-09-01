@@ -333,7 +333,7 @@ void DecodeIAT()
 			//*(ULONG_PTR*)((ULONG_PTR)g_stcParam.pMyImport[i].m_dwIATAddr + g_stcParam.dwImageBase) = (ULONG_PTR)dwFunAddr;
 
 			//"MSVCP140.dll"暂时不要处理，会出错，原因还未找到
-			if (Preventdebug.g_fnplstrcmpi(pModName, "MSVCP140.dll") != 0)
+			if (Preventdebug.g_fnplstrcmpi(pModName, "MSVCP140.dll") == 0)
 			{
 #ifdef _WIN64
 				BYTE byByte[]{ 0xEB ,0x02 ,0xE8 ,0x32 ,0x50 ,0x48 ,0xC7 ,0xC0 ,0x66 ,0x66 ,0x88	,0x88 ,0x58,
@@ -374,7 +374,7 @@ void DecodeIAT()
 
 			
 			//"MSVCP140.dll"暂时不要处理，会出错，原因还未找到
-			if (Preventdebug.g_fnplstrcmpi(pModName,"MSVCP140.dll")!=0)
+			if (Preventdebug.g_fnplstrcmpi(pModName,"MSVCP140.dll")==0)
 			{
 #ifdef _WIN64
 				BYTE byByte[]{ 0xEB ,0x02 ,0xE8 ,0x32 ,0x50 ,0x48 ,0xC7 ,0xC0 ,0x66 ,0x66 ,0x88	,0x88 ,0x58,
