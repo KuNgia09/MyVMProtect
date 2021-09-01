@@ -238,7 +238,7 @@ void Pack::getinfo(char* m_pFileBuf)
 	{
 		//获取IAT所在区段
 		if (m_PEImportDir.VirtualAddress >= pSectionHeader->VirtualAddress &&
-			m_PEImportDir.VirtualAddress <= pSectionHeader[1].VirtualAddress)
+			m_PEImportDir.VirtualAddress < pSectionHeader[1].VirtualAddress)
 		{
 			//保存该区段的起始地址和大小
 			m_IATSectionBase = pSectionHeader->VirtualAddress;

@@ -71,12 +71,11 @@ predebug :
 
 		call DecodeIAT
 		jmp decodeiat
-		rebulidiat :
+	rebulidiat :
 		call RebuildImportTable
-			decodeiat :
-
+	decodeiat :
 		popfd
-			jmp g_oep
+		jmp g_oep
 	}
 #endif
 }
