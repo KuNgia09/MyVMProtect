@@ -440,7 +440,8 @@ void Pack::ClearDirTable(char* filebuff)
 	{
 		if (i != IMAGE_DIRECTORY_ENTRY_EXPORT &&
 			i != IMAGE_DIRECTORY_ENTRY_RESOURCE &&
-			i != IMAGE_DIRECTORY_ENTRY_BASERELOC)
+			i != IMAGE_DIRECTORY_ENTRY_BASERELOC && 
+			i!= IMAGE_DIRECTORY_ENTRY_TLS)
 		{
 			pNtHeader->OptionalHeader.DataDirectory[i].VirtualAddress = 0;
 			pNtHeader->OptionalHeader.DataDirectory[i].Size = 0;
