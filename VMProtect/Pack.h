@@ -45,7 +45,9 @@ public:
 	void SaveFile_pack(TCHAR* strPath, char* NewBuffer, ULONG_PTR m_uTotalSize);
 
 	//RVA转File offset
-	DWORD RvaToOffset(PVOID peBuff, DWORD Rva);
+	DWORD RvaToOffset(DWORD peBuff, DWORD Rva);
+
+	void FixupTLSAddressCallback(DWORD peFileBuffer, DWORD newAddressCallback);
 public:
 
 	//typedef struct _PROTECTOR
@@ -105,7 +107,7 @@ public:
 	ULONG_PTR		m_dwSizeOfFunBuf = 0;
 
 	BOOL m_isUseTLS = false;
-	PVOID m_TlsAddressOfCallback = NULL;
+	ULONG_PTR m_TlsAddressOfCallback = NULL;
 
 	DWORD m_encryptCodeSize;
 	ULONG_PTR					m_IATSectionBase = 0;	//IAT所在段基址

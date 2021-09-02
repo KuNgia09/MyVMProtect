@@ -46,9 +46,10 @@ extern "C"
 		BYTE byXor;				// 加密异或的值
 
 		BOOL isDecrypt;//壳代码是否解密完成
+
 		BOOL isUseSTl;
 		// 指向stl回调函数数组
-		PVOID originalStlAddressOfCallback;
+		ULONG_PTR originalStlAddressOfCallback;
 		
 		IMAGE_DATA_DIRECTORY	stcPERelocDir;		//重定位表信息
 		IMAGE_DATA_DIRECTORY	stcPEImportDir;		//导入表信息

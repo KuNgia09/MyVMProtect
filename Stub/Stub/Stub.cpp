@@ -4,7 +4,7 @@
 #include "JunkCode.h"
 //#include <algorithm>
 #include "Vector_.h"
-EXTERN_C __declspec(dllexport) GLOBAL_PARAM g_stcParam = { (ULONG_PTR)Start,(ULONG_PTR)StubTlsCallback};
+
 
 PreventDebug Preventdebug;
 typedef void(*FUN)();
@@ -23,10 +23,11 @@ void DecodeIAT();
 void preventdebug();
 
 //处理TLS
-void DealTLS();
+void CallTLS();
 
+void NTAPI StubTlsCallback(PVOID handle, DWORD reason, PVOID reserved);
 
-
+EXTERN_C __declspec(dllexport) GLOBAL_PARAM g_stcParam = { (ULONG_PTR)Start,(ULONG_PTR)StubTlsCallback };
 /*----------------------------------------------------------------------------------*/
 /*		   加壳程序开始执行的地方   												*/
 /*----------------------------------------------------------------------------------*/
@@ -78,12 +79,14 @@ predebug :
 		call RebuildImportTable
 	decodeiat :
 		xor eax,eax
-		mov eax,dword ptr[g_stcParam.stlAddressOfCallback]
+		mov eax,dword ptr[g_stcParam.originalStlAddressOfCallback]
 		cmp eax,0
 		je jmpoep
-		call DealTLS
+		call CallTLS
 	jmpoep:
 		popfd
+	    //壳代码运行完成
+		mov dword ptr[g_stcParam.isDecrypt],1
 		jmp g_oep
 	}
 #endif
@@ -429,35 +432,41 @@ typedef void (NTAPI *pfn_tlsCallback)(PVOID handle, DWORD reason, PVOID reserved
 
 
 void NTAPI StubTlsCallback(PVOID handle, DWORD reason, PVOID reserved) {
-	Preventdebug.g_fnOutputDebugStringA("call StubTlsCallback\n");
+	
 	if (g_stcParam.isDecrypt) {
+		Preventdebug.g_fnOutputDebugStringA("call StubTlsCallback is decrypt\n");
 		//循环调用被加壳程序的TLS回调函数
+		CallTLS();
+	}
+	else {
+		Preventdebug.g_fnOutputDebugStringA("call StubTlsCallback no decrypt\n");
 	}
 }
 
-void DealTLS() {
-	ULONG_PTR stlCallback=g_stcParam.originalStlAddressOfCallback;
-	
-	//遍历回调数组
-	while (*(ULONG_PTR*)stlCallback) {
-		pfn_tlsCallback addr = (pfn_tlsCallback)(*(ULONG_PTR*)stlCallback);
+void CallTLS() {
+	pfn_tlsCallback* tlsCallback=(pfn_tlsCallback*)g_stcParam.originalStlAddressOfCallback;
+	if (tlsCallback == NULL) return;
+
+	//循环调用TLS回调函数
+	while (*tlsCallback) {
+		pfn_tlsCallback addr = *tlsCallback;
 		HANDLE handle=Preventdebug.g_pfnGetModuleHandleA(NULL);
 		addr(handle,DLL_PROCESS_ATTACH,0);
-		stlCallback+=sizeof(ULONG_PTR);
+		tlsCallback++;
 
 	}
-	ULONG_PTR imgBuff = g_stcParam.dwImageBase;
-	PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)imgBuff;
-	PIMAGE_NT_HEADERS pNtHeader = (PIMAGE_NT_HEADERS)((DWORD)imgBuff + pDosHeader->e_lfanew);
+	//ULONG_PTR imgBuff = g_stcParam.dwImageBase;
+	//PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)imgBuff;
+	//PIMAGE_NT_HEADERS pNtHeader = (PIMAGE_NT_HEADERS)((DWORD)imgBuff + pDosHeader->e_lfanew);
 
-	IMAGE_DATA_DIRECTORY tlsDataDirectory = pNtHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS];
-	PIMAGE_TLS_DIRECTORY tlsDir = (PIMAGE_TLS_DIRECTORY)(tlsDataDirectory.VirtualAddress + (DWORD)imgBuff);
+	//IMAGE_DATA_DIRECTORY tlsDataDirectory = pNtHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS];
+	//PIMAGE_TLS_DIRECTORY tlsDir = (PIMAGE_TLS_DIRECTORY)(tlsDataDirectory.VirtualAddress + (DWORD)imgBuff);
 
-	DWORD oldProtect;
-	Preventdebug.g_pfnVirtualProtect(tlsDir, sizeof(IMAGE_TLS_DIRECTORY), PAGE_READWRITE, &oldProtect);
+	//DWORD oldProtect;
+	//Preventdebug.g_pfnVirtualProtect(tlsDir, sizeof(IMAGE_TLS_DIRECTORY), PAGE_READWRITE, &oldProtect);
 
-	//恢复stl
-	tlsDir->AddressOfCallBacks = g_stcParam.originalStlAddressOfCallback;
+	////恢复stl
+	//tlsDir->AddressOfCallBacks = g_stcParam.originalStlAddressOfCallback;
 
-	Preventdebug.g_pfnVirtualProtect(tlsDir, sizeof(IMAGE_TLS_DIRECTORY), oldProtect,NULL);
+	//Preventdebug.g_pfnVirtualProtect(tlsDir, sizeof(IMAGE_TLS_DIRECTORY), oldProtect,NULL);
 }

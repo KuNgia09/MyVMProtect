@@ -122,6 +122,30 @@ void Pack::StartProtect(HWND hwndDlg, TCHAR* strPath, TCHAR* NewFileBuff, PEInfo
 	GetModuleInformation(GetCurrentProcess(), hModule, &modinfo, sizeof(MODULEINFO));
 	pstcParam->dwIATBaseRVA = peinfo.SizeofImage + modinfo.SizeOfImage;
 
+	
+
+
+	
+	ULONG_PTR TarSizeofImage = pe.AlignSize(peinfo.SizeofImage, peinfo.OptionalHeader->SectionAlignment);
+	
+	//保存原始的m_TlsAddressOfCallback
+	pstcParam->originalStlAddressOfCallback = m_TlsAddressOfCallback;
+
+	//修复TLS
+	//存在TLS回调函数
+	if (m_TlsAddressOfCallback != NULL) {
+		//保存原始的TLS函数数组地址
+		
+		//获取StubTlsCallback的绝对地址
+		DWORD StubStlAddress=pstcParam->dwImageBase + TarSizeofImage + (pstcParam->dwStubTlsCallback - (ULONG_PTR)hModule);
+		//并将这个地址写入到数组里面
+		pstcParam->StubTLSCallbackArray[0] = StubStlAddress;
+		pstcParam->StubTLSCallbackArray[1] = NULL;
+
+		//修改TLS的AddressOfCallback
+		FixupTLSAddressCallback(peinfo.FileBuffer, (DWORD)&pstcParam->StubTLSCallbackArray);
+	}
+
 	PBYTE lpMod = m_alloc.auto_malloc<PBYTE>(modinfo.SizeOfImage);
 	//拷贝Stub.dll的镜像内存到lpMod
 	memcpy_s(lpMod, modinfo.SizeOfImage, hModule, modinfo.SizeOfImage);
@@ -129,19 +153,8 @@ void Pack::StartProtect(HWND hwndDlg, TCHAR* strPath, TCHAR* NewFileBuff, PEInfo
 
 	pe.GetPEInformation_1((char*)lpMod, &stubpeinfo);
 
-
 	//2.3.2 修复重定位表
-	ULONG_PTR TarSizeofImage = pe.AlignSize(peinfo.SizeofImage, peinfo.OptionalHeader->SectionAlignment);
 	ULONG_PTR value = stubpeinfo.ImageBase - (peinfo.OptionalHeader->ImageBase + TarSizeofImage);
-
-	//存在TLS回调函数
-	if (m_TlsAddressOfCallback != NULL) {
-		//StubTlsCallback的绝对地址
-		DWORD StubStlAddress=pstcParam->dwImageBase + TarSizeofImage + (pstcParam->dwStubTlsCallback - (ULONG_PTR)hModule);
-		//并将这个地址写入到数组里面
-		pstcParam->StubTLSCallbackArray[0] = StubStlAddress;
-
-	}
 	if (value != 0)
 	{
 		//给Stub.dll添加重定位
@@ -180,7 +193,7 @@ void Pack::StartProtect(HWND hwndDlg, TCHAR* strPath, TCHAR* NewFileBuff, PEInfo
 	return;
 }
 
-DWORD Pack::RvaToOffset(PVOID peBuff,DWORD Rva)
+DWORD Pack::RvaToOffset(DWORD peBuff,DWORD Rva)
 {
 	PIMAGE_DOS_HEADER pDos = (PIMAGE_DOS_HEADER)peBuff;
 	PIMAGE_NT_HEADERS pNt = (PIMAGE_NT_HEADERS)(pDos->e_lfanew +(DWORD)peBuff);
@@ -200,6 +213,23 @@ DWORD Pack::RvaToOffset(PVOID peBuff,DWORD Rva)
 		pSection = pSection + 1;
 	}
 	return -1;
+}
+
+
+
+void Pack::FixupTLSAddressCallback(DWORD peFileBuffer,DWORD newAddressCallback) {
+	PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)peFileBuffer;
+	PIMAGE_NT_HEADERS pNtHeader = (PIMAGE_NT_HEADERS)((DWORD)peFileBuffer + pDosHeader->e_lfanew);
+
+	IMAGE_DATA_DIRECTORY tlsDataDirectory = pNtHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS];
+	DWORD tlsFileOffset=RvaToOffset(peFileBuffer, tlsDataDirectory.VirtualAddress);
+	if (tlsFileOffset > 0) {
+		PIMAGE_TLS_DIRECTORY tlsDir = (PIMAGE_TLS_DIRECTORY)peFileBuffer + tlsFileOffset;
+		//修改tlscallback为壳的callback
+		tlsDir->AddressOfCallBacks = newAddressCallback;
+
+	}
+
 }
 //机器码绑定(将CPU序列号同主程序入口进行亦或)
 void Pack::XorMachineCode(ULONGLONG cpuId, PEInfo& peinfo)
@@ -247,7 +277,7 @@ void Pack::DealTLSCallback(DWORD imgBuff) {
 	//如果有TLS
 	PIMAGE_TLS_DIRECTORY tlsDir = (PIMAGE_TLS_DIRECTORY)(tlsDataDirectory.VirtualAddress + (DWORD)imgBuff);
 	
-	PVOID TlsAddressOfCallback = (PVOID)tlsDir->AddressOfCallBacks;
+	ULONG_PTR TlsAddressOfCallback = (ULONG_PTR)tlsDir->AddressOfCallBacks;
 	
 	//存在TLS回调函数
 	if (TlsAddressOfCallback != NULL && (*(ULONG_PTR*)TlsAddressOfCallback) != NULL) {
@@ -261,9 +291,7 @@ void Pack::DealTLSCallback(DWORD imgBuff) {
 }
 
 
-void Pack::FixTLSCallback(DWORD imgBuff) {
 
-}
 //加密代码段
 DWORD Pack::XorCode(BYTE byXOR, PEInfo peinfo)
 {
