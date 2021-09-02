@@ -27,6 +27,7 @@ typedef struct PEInformation
 	POINTER_TYPE FileAlignment;			//文件对齐
 	POINTER_TYPE SizeofImage;			//镜像大小
 	POINTER_TYPE SizeOfHeaders;			//头大小
+	POINTER_TYPE EncryptCodeSize;       //要加密的代码区域大小
 	IMAGE_DATA_DIRECTORY* DataDirectory;	//目录
 	PIMAGE_NT_HEADERS pNtHeader;			//Nt头
 	PIMAGE_SECTION_HEADER pSectionHeader;	//节头

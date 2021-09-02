@@ -21,6 +21,9 @@ public:
 	//加密代码段
 	DWORD XorCode(BYTE byXOR, PEInfo peinfo);
 
+	//处理TLS
+	void DealTLS(ULONG_PTR peinfo);
+
 	//获取IAT表信息和重定位信息
 	void getinfo(char* cbuff);
 
@@ -97,7 +100,10 @@ public:
 	ULONG_PTR		m_dwSizeOfModBuf = 0;
 	ULONG_PTR		m_dwSizeOfFunBuf = 0;
 
+	BOOL m_isUseTLS = false;
+	ULONG_PTR m_TlsAddressOfCallback = NULL;
 
+	DWORD m_encryptCodeSize;
 	ULONG_PTR					m_IATSectionBase = 0;	//IAT所在段基址
 	DWORD						m_IATSectionSize = 0;	//IAT所在段大小
 

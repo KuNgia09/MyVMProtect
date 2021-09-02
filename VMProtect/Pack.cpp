@@ -26,6 +26,9 @@ void Pack::StartProtect(HWND hwndDlg, TCHAR* strPath, TCHAR* NewFileBuff, PEInfo
 		ClearImportTab((char*)TempBuff);
 	}
 
+	DealTLS(TempBuff);
+
+
 	//1.3 判断反调试复选框是否被选中
 	if (false)
 	{
@@ -39,6 +42,7 @@ void Pack::StartProtect(HWND hwndDlg, TCHAR* strPath, TCHAR* NewFileBuff, PEInfo
 
 	//1.4 获取IAT表信息和重定位信息
 	getinfo((char*)TempBuff);
+
 
 
 	DWORD strip_length;
@@ -89,12 +93,13 @@ void Pack::StartProtect(HWND hwndDlg, TCHAR* strPath, TCHAR* NewFileBuff, PEInfo
 	PGLOBAL_PARAM pstcParam = (PGLOBAL_PARAM)GetProcAddress(hModule, "g_stcParam");
 
 	pstcParam->dwImageBase = peinfo.ImageBase;
-	pstcParam->dwCodeSize = peinfo.SizeOfCode;
+	pstcParam->dwCodeSize = m_encryptCodeSize;
 	pstcParam->ulBaseOfCode = peinfo.BaseOfCode;
 	pstcParam->dwOEP = peinfo.AddressOfEntryPoint;
 	pstcParam->byXor = byXor;
 	pstcParam->lpStartVA = (PBYTE)dwVirtualAddr;
-
+	//保存TLS回调函数指针
+	pstcParam->stlAddressOfCallback = m_TlsAddressOfCallback;
 	//保存IAT的信息到Stub.dll的g_stcParam全局变量里
 	pstcParam->stcPEImportDir = m_PEImportDir;
 	pstcParam->stcPERelocDir = m_PERelocDir;
@@ -190,6 +195,29 @@ ULONGLONG Pack::GetCPUID()
 	return cpuId;
 }
 
+void Pack::DealTLS(ULONG_PTR imgBuff) {
+	PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)imgBuff;
+	PIMAGE_NT_HEADERS pNtHeader = (PIMAGE_NT_HEADERS)((DWORD)imgBuff + pDosHeader->e_lfanew);
+
+	IMAGE_DATA_DIRECTORY tlsDataDirectory = pNtHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS];
+
+	//没有TLS返回
+	if (tlsDataDirectory.VirtualAddress == 0) {
+		m_isUseTLS = false;
+		return;
+	}
+	//如果有TLS
+	PIMAGE_TLS_DIRECTORY tlsDir = (PIMAGE_TLS_DIRECTORY)(tlsDataDirectory.VirtualAddress + (DWORD)imgBuff);
+	//保存TLS回调函数
+	m_TlsAddressOfCallback = tlsDir->AddressOfCallBacks;
+	
+	//防止壳代码运行之前执行TLS回调
+	tlsDir->AddressOfCallBacks = 0;
+	
+
+	
+}
+
 //加密代码段
 DWORD Pack::XorCode(BYTE byXOR, PEInfo peinfo)
 {
@@ -215,9 +243,9 @@ DWORD Pack::XorCode(BYTE byXOR, PEInfo peinfo)
 		pBase[i] ^= byXOR;
 	}*/
 
-	peinfo.SizeOfCode = Temp->SizeOfRawData;
+	m_encryptCodeSize = Temp->SizeOfRawData;
 	//这里不取peinfo.SizeOfCode 取SizeOfRawData 
-	for (int i = 0; i < Temp->SizeOfRawData; i++)
+	for (int i = 0; i < m_encryptCodeSize; i++)
 	{
 		pBase[i] ^= byXOR;
 	}

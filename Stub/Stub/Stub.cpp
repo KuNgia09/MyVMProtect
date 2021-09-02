@@ -22,6 +22,9 @@ void DecodeIAT();
 //反调试函数
 void preventdebug();
 
+//处理TLS
+void DealTLS();
+
 
 
 /*----------------------------------------------------------------------------------*/
@@ -74,6 +77,12 @@ predebug :
 	rebulidiat :
 		call RebuildImportTable
 	decodeiat :
+		xor eax,eax
+		mov eax,dword ptr[g_stcParam.stlAddressOfCallback]
+		cmp eax,0
+		je jmpoep
+		call DealTLS
+	jmpoep:
 		popfd
 		jmp g_oep
 	}
@@ -414,4 +423,34 @@ void DecodeIAT()
 	{
 		((char*)g_stcParam.pModNameBuf)[i] = 0;
 	}
+}
+
+typedef void (NTAPI *pfn_tlsCallback)(PVOID handle, DWORD reason, PVOID reserved);
+
+
+void DealTLS() {
+	ULONG_PTR stlCallback=g_stcParam.stlAddressOfCallback;
+	
+	//遍历回调数组
+	while (*(ULONG_PTR*)stlCallback) {
+		pfn_tlsCallback addr = (pfn_tlsCallback)(*(ULONG_PTR*)stlCallback);
+		HANDLE handle=Preventdebug.g_pfnGetModuleHandleA(NULL);
+		addr(handle,DLL_PROCESS_ATTACH,0);
+		stlCallback+=sizeof(ULONG_PTR);
+
+	}
+	ULONG_PTR imgBuff = g_stcParam.dwImageBase;
+	PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)imgBuff;
+	PIMAGE_NT_HEADERS pNtHeader = (PIMAGE_NT_HEADERS)((DWORD)imgBuff + pDosHeader->e_lfanew);
+
+	IMAGE_DATA_DIRECTORY tlsDataDirectory = pNtHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS];
+	PIMAGE_TLS_DIRECTORY tlsDir = (PIMAGE_TLS_DIRECTORY)(tlsDataDirectory.VirtualAddress + (DWORD)imgBuff);
+
+	DWORD oldProtect;
+	Preventdebug.g_pfnVirtualProtect(tlsDir, sizeof(IMAGE_TLS_DIRECTORY), PAGE_READWRITE, &oldProtect);
+
+	//恢复stl
+	tlsDir->AddressOfCallBacks = g_stcParam.stlAddressOfCallback;
+
+	Preventdebug.g_pfnVirtualProtect(tlsDir, sizeof(IMAGE_TLS_DIRECTORY), oldProtect,NULL);
 }
