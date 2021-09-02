@@ -18,6 +18,8 @@ public:
 	typedef HANDLE	(WINAPI* fnGetProcessHeap)(VOID);
 	typedef DWORD	(WINAPI*fnGetTickCount)(VOID);
 	typedef int(__stdcall* fnLSTRCMP)(_In_ LPCSTR lpString1, _In_ LPCSTR lpString2);
+
+	typedef void (__stdcall*  fnOutputDebugStringA)(LPCSTR lpOutputString);
 	
 	fnLSTRCMP		g_fnplstrcmpi;
 	
@@ -32,6 +34,8 @@ public:
 	fnVirtualAlloc		g_pfnVirtualAlloc = NULL;
 	fnExitProcess		g_pfnExitProcess = NULL;
 	fnMessageBox		g_pfnMessageBox = NULL;
+	fnOutputDebugStringA g_fnOutputDebugStringA = NULL;
+
 public:
 	//获取kernel32.dll的模块基址
 	UCHAR* GetKernel32Addr();

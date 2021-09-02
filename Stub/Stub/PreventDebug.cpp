@@ -109,9 +109,11 @@ void PreventDebug::InitInformation()
 	g_HeapFree = (fnHeapFree)g_pfnGetProcAddress(hKernel32, "HeapFree");
 	g_HeapAlloc = (fnHeapAlloc)g_pfnGetProcAddress(hKernel32, "HeapAlloc");
 	g_pfnExitProcess = (fnExitProcess)g_pfnGetProcAddress(hKernel32, "ExitProcess");
-	 g_fnGetTickCount	=(fnGetTickCount)g_pfnGetProcAddress(hKernel32, "GetTickCount");//获取开机时间
+	g_fnGetTickCount	=(fnGetTickCount)g_pfnGetProcAddress(hKernel32, "GetTickCount");//获取开机时间
 	g_pfnMessageBox = (fnMessageBox)g_pfnGetProcAddress(hUser32, "MessageBoxW");
 	g_fnplstrcmpi = (fnLSTRCMP)g_pfnGetProcAddress(hKernel32, "lstrcmpiA");
+	g_fnOutputDebugStringA = (fnOutputDebugStringA)g_pfnGetProcAddress(hKernel32, "OutputDebugStringA");
+
 
 
 }

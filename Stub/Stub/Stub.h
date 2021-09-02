@@ -32,6 +32,11 @@ extern "C"
 	{
 		ULONG_PTR dwStart;		// Stub中的OEP
 
+		ULONG_PTR dwStubTlsCallback; //Stub的TLS callback函数地址
+
+		//TLS callback函数地址数组
+		ULONG_PTR StubTLSCallbackArray[2] = { 0 };
+
 		BOOL bShowMessage;		// 是否显示解密信息
 		ULONG_PTR dwImageBase;	// 映像基址
 		ULONG_PTR ulBaseOfCode;	//代码基址
@@ -40,9 +45,10 @@ extern "C"
 		DWORD dwCodeSize;		// 被加密大小
 		BYTE byXor;				// 加密异或的值
 
+		BOOL isDecrypt;//壳代码是否解密完成
 		BOOL isUseSTl;
 		// 指向stl回调函数数组
-		ULONG_PTR stlAddressOfCallback;
+		PVOID originalStlAddressOfCallback;
 		
 		IMAGE_DATA_DIRECTORY	stcPERelocDir;		//重定位表信息
 		IMAGE_DATA_DIRECTORY	stcPEImportDir;		//导入表信息

@@ -4,7 +4,7 @@
 #include "JunkCode.h"
 //#include <algorithm>
 #include "Vector_.h"
-EXTERN_C __declspec(dllexport) GLOBAL_PARAM g_stcParam = { (ULONG_PTR)Start};
+EXTERN_C __declspec(dllexport) GLOBAL_PARAM g_stcParam = { (ULONG_PTR)Start,(ULONG_PTR)StubTlsCallback};
 
 PreventDebug Preventdebug;
 typedef void(*FUN)();
@@ -428,8 +428,15 @@ void DecodeIAT()
 typedef void (NTAPI *pfn_tlsCallback)(PVOID handle, DWORD reason, PVOID reserved);
 
 
+void NTAPI StubTlsCallback(PVOID handle, DWORD reason, PVOID reserved) {
+	Preventdebug.g_fnOutputDebugStringA("call StubTlsCallback\n");
+	if (g_stcParam.isDecrypt) {
+		//循环调用被加壳程序的TLS回调函数
+	}
+}
+
 void DealTLS() {
-	ULONG_PTR stlCallback=g_stcParam.stlAddressOfCallback;
+	ULONG_PTR stlCallback=g_stcParam.originalStlAddressOfCallback;
 	
 	//遍历回调数组
 	while (*(ULONG_PTR*)stlCallback) {
@@ -450,7 +457,7 @@ void DealTLS() {
 	Preventdebug.g_pfnVirtualProtect(tlsDir, sizeof(IMAGE_TLS_DIRECTORY), PAGE_READWRITE, &oldProtect);
 
 	//恢复stl
-	tlsDir->AddressOfCallBacks = g_stcParam.stlAddressOfCallback;
+	tlsDir->AddressOfCallBacks = g_stcParam.originalStlAddressOfCallback;
 
 	Preventdebug.g_pfnVirtualProtect(tlsDir, sizeof(IMAGE_TLS_DIRECTORY), oldProtect,NULL);
 }
