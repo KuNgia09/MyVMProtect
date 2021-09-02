@@ -24,7 +24,7 @@ public:
 
 
 	//处理TLS
-	void DealTLSCallback(ULONG_PTR peinfo);
+	void DealTLSCallback(DWORD imgBuff);
 
 	//获取IAT表信息和重定位信息
 	void getinfo(char* cbuff);

@@ -44,6 +44,7 @@ void Pack::StartProtect(HWND hwndDlg, TCHAR* strPath, TCHAR* NewFileBuff, PEInfo
 	getinfo((char*)TempBuff);
 
 
+	DealTLSCallback(TempBuff);
 
 	DWORD strip_length;
 	//1.5 把拉伸的文件还原成磁盘大小
@@ -142,8 +143,11 @@ void Pack::StartProtect(HWND hwndDlg, TCHAR* strPath, TCHAR* NewFileBuff, PEInfo
 		pstcParam->StubTLSCallbackArray[0] = StubStlAddress;
 		pstcParam->StubTLSCallbackArray[1] = NULL;
 
+		//壳TLS数组地址
+		DWORD StubAddressCallback = pstcParam->dwImageBase + TarSizeofImage + (DWORD)(&pstcParam->StubTLSCallbackArray) - (DWORD)hModule;
+
 		//修改TLS的AddressOfCallback
-		FixupTLSAddressCallback(peinfo.FileBuffer, (DWORD)&pstcParam->StubTLSCallbackArray);
+		FixupTLSAddressCallback(peinfo.FileBuffer, StubAddressCallback);
 	}
 
 	PBYTE lpMod = m_alloc.auto_malloc<PBYTE>(modinfo.SizeOfImage);
@@ -224,7 +228,7 @@ void Pack::FixupTLSAddressCallback(DWORD peFileBuffer,DWORD newAddressCallback) 
 	IMAGE_DATA_DIRECTORY tlsDataDirectory = pNtHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS];
 	DWORD tlsFileOffset=RvaToOffset(peFileBuffer, tlsDataDirectory.VirtualAddress);
 	if (tlsFileOffset > 0) {
-		PIMAGE_TLS_DIRECTORY tlsDir = (PIMAGE_TLS_DIRECTORY)peFileBuffer + tlsFileOffset;
+		PIMAGE_TLS_DIRECTORY tlsDir = (PIMAGE_TLS_DIRECTORY)(peFileBuffer + tlsFileOffset);
 		//修改tlscallback为壳的callback
 		tlsDir->AddressOfCallBacks = newAddressCallback;
 
@@ -279,8 +283,11 @@ void Pack::DealTLSCallback(DWORD imgBuff) {
 	
 	ULONG_PTR TlsAddressOfCallback = (ULONG_PTR)tlsDir->AddressOfCallBacks;
 	
+	
+	ULONG_PTR itemAddr = TlsAddressOfCallback - pNtHeader->OptionalHeader.ImageBase + imgBuff;
+
 	//存在TLS回调函数
-	if (TlsAddressOfCallback != NULL && (*(ULONG_PTR*)TlsAddressOfCallback) != NULL) {
+	if (TlsAddressOfCallback != NULL && (*(ULONG_PTR*)itemAddr) != NULL) {
 		m_TlsAddressOfCallback = TlsAddressOfCallback;
 	}
 	//如果没有TLS回调 清空
@@ -635,12 +642,13 @@ void Pack::SaveFile_pack(TCHAR* strPath, char* NewBuffer, ULONG_PTR m_uTotalSize
 	CString str = strPath;
 	int cutsize = str.RightFindChar(strPath, 0x5c);//0x5c是‘\’这个字符的二进制
 	CString s = str.MidCut(cutsize + 1, _tcslen(strPath) - cutsize - 5);
+	CString dir = str.MidCut(0, cutsize);
 
 
-	TCHAR Path_Out[MAX_PATH];
-	_tgetcwd(Path_Out, MAX_PATH);//获取当前程序的路径
+	//TCHAR Path_Out[MAX_PATH];
+	//_tgetcwd(Path_Out, MAX_PATH);//获取当前程序的路径
 
-	str = Path_Out;
+	str = dir;
 #ifdef UNICODE
 	str = str + L"\\" + s.GetString() + L"_vmp.exe";
 #else

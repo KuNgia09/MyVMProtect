@@ -23,7 +23,7 @@ void DecodeIAT();
 void preventdebug();
 
 //处理TLS
-void CallTLS();
+void CallTLS(DWORD reason);
 
 void NTAPI StubTlsCallback(PVOID handle, DWORD reason, PVOID reserved);
 
@@ -82,6 +82,7 @@ predebug :
 		mov eax,dword ptr[g_stcParam.originalStlAddressOfCallback]
 		cmp eax,0
 		je jmpoep
+		push 1
 		call CallTLS
 	jmpoep:
 		popfd
@@ -436,14 +437,14 @@ void NTAPI StubTlsCallback(PVOID handle, DWORD reason, PVOID reserved) {
 	if (g_stcParam.isDecrypt) {
 		Preventdebug.g_fnOutputDebugStringA("call StubTlsCallback is decrypt\n");
 		//循环调用被加壳程序的TLS回调函数
-		CallTLS();
+		CallTLS(reason);
 	}
 	else {
 		Preventdebug.g_fnOutputDebugStringA("call StubTlsCallback no decrypt\n");
 	}
 }
 
-void CallTLS() {
+void CallTLS(DWORD reason) {
 	pfn_tlsCallback* tlsCallback=(pfn_tlsCallback*)g_stcParam.originalStlAddressOfCallback;
 	if (tlsCallback == NULL) return;
 
@@ -451,7 +452,7 @@ void CallTLS() {
 	while (*tlsCallback) {
 		pfn_tlsCallback addr = *tlsCallback;
 		HANDLE handle=Preventdebug.g_pfnGetModuleHandleA(NULL);
-		addr(handle,DLL_PROCESS_ATTACH,0);
+		addr(handle,reason,0);
 		tlsCallback++;
 
 	}
