@@ -108,10 +108,10 @@ void TAB_Dialog::On_Paint(HWND hwndlg)
 	//Image image(L"beat.png");
 	Image image(L"timg.jpg");
 
-	if (image.GetLastStatus() != Status::Ok) {
+	/*if (image.GetLastStatus() != Status::Ok) {
 		MessageBoxW(hwndlg, L"加载图片失败!", L"提示", MB_OK);
 		return;
-	}
+	}*/
 
 	RECT rctA; //定义一个RECT结构体，存储窗口的长宽高
 	::GetWindowRect(hwndlg, &rctA);//通过窗口句柄获得窗口的大小存储在rctA结构中

@@ -178,7 +178,8 @@ ULONG_PTR  InitInformation()
 	int nRet = Preventdebug.g_pfnMessageBox(NULL, L"欢迎使用免费64位加壳程序，是否运行主程序？", L"Hello PEDIY", MB_YESNO);
 #else
 	//弹出信息框			
-	int nRet = Preventdebug.g_pfnMessageBox(NULL, L"欢迎使用免费32位加壳程序，是否运行主程序？", L"Hello PEDIY", MB_YESNO);
+	//int nRet = Preventdebug.g_pfnMessageBox(NULL, L"欢迎使用免费32位加壳程序，是否运行主程序？", L"Hello PEDIY", MB_YESNO);
+	int nRet = IDYES;
 #endif
 	if (nRet == IDYES)
 	{
