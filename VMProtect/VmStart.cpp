@@ -284,6 +284,7 @@ void vmloader_(PE& pe, PEInfo& peinfo, char* vmp1_buff, int index)
 }
 
 void testprofunc(char* path, vector<DWORD>temp_addr)
+
 {
     AllocMemory l_alloc;
     PEInfo peinfo;

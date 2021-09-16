@@ -134,6 +134,8 @@ vector<DWORD>temp_addr;
 DWORD WINAPI ThreadProc(_In_ LPVOID lpParameter)
 {
 	TAB_Dialog* pt = (TAB_Dialog * )lpParameter;
+	
+
 	VMStart(pt->str_path,temp_addr);
 
 	CString str_notify = "";
@@ -172,13 +174,14 @@ BOOL __stdcall TAB_Dialog:: tab1_dlg_proc(HWND hwnd, UINT uMsg, WPARAM wParam, L
 		{
 		case IDC_PRO_BUTTON://编译
 		{
+			memcpy(pt->str_path, "D:\\project\\MyVMProtect\\Debug\\VMProtect - 副本.exe",strlen("D:\\project\\MyVMProtect\\Debug\\VMProtect - 副本.exe") );
 			if (pt->str_path[0] == 0)
 			{
 				MessageBoxA(NULL, "请添加PE格式文件!", "错误", MB_OK);
 				return 0;
 			}
 			CString str = pt->str_vmaddr;
-
+			str = "004414a0\r\n";
 			char linestr[32] = { 0 };
 			int nlen = str.GetCount();
 			char* cstr = str.GetString();
@@ -280,11 +283,11 @@ void TAB_Dialog::OnCommand(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 	case IDC_BUTTON_ADD://添加
 	{
-		if (isFile==false)
+		/*if (isFile==false)
 		{
 			MessageBoxA(NULL, "请添加PE格式文件，再来添加函数!", "提示", MB_OK);
 			return;
-		}
+		}*/
 		TCHAR str[STRINGLENGTH] = { 0 };
 		TCHAR str_1[BSTRINGLENGTH] = { 0 };
 		GetDlgItemTextA(hwnd, IDC_EDIT_INPUT, str, STRINGLENGTH);
