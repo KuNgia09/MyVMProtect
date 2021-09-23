@@ -150,7 +150,8 @@ void VMLoader2::Construct_Rub_Instruction(char* jmpdispatcher, int index, int nm
 	l_jmptbl.index = temp_basic.index;
 	l_jmptbl.addr = temp_basic.addr;
 	m_jmptbl.push_back(l_jmptbl);//把地址记录到跳转表里
-	int srandnum = SrandNum(6, 18);
+	// int srandnum = SrandNum(6, 18);
+	int srandnum = 6;
 	for (int i = 0; i < srandnum; i++)
 	{
 		rubstr = ProduceRubbishOpecode(m_reg04, m_reg05);
@@ -169,7 +170,8 @@ void VMLoader2::Construct_Rub_Instruction(char* jmpdispatcher, int index, int nm
 //设置垃圾块的数目
 void VMLoader2::Construct_Rub_Instruction_Num(char* jmpdispatcher, int index)
 {
-	int srandnum = SrandNum(5, 8);
+	//int srandnum = SrandNum(5, 8);
+	int srandnum =5;
 	for (int i = 0; i < srandnum; i++)
 	{
 		Construct_Rub_Instruction(jmpdispatcher, index);
