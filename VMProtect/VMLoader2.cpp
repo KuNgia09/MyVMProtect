@@ -151,7 +151,7 @@ void VMLoader2::Construct_Rub_Instruction(char* jmpdispatcher, int index, int nm
 	l_jmptbl.addr = temp_basic.addr;
 	m_jmptbl.push_back(l_jmptbl);//把地址记录到跳转表里
 	// int srandnum = SrandNum(6, 18);
-	int srandnum = 6;
+	int srandnum = 1;
 	for (int i = 0; i < srandnum; i++)
 	{
 		rubstr = ProduceRubbishOpecode(m_reg04, m_reg05);
@@ -729,7 +729,7 @@ void VMLoader2::MainVMP()
 	ResumeEsiAndEbp();
 
 	//2、乱序垃圾指令，用于vm环境开始前
-	Out_Of_Order_RubInstruction();
+	//Out_Of_Order_RubInstruction();
 
 	//3、读取需要保护的指令
 	DisassembleEngine();
