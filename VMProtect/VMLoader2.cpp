@@ -151,12 +151,12 @@ void VMLoader2::Construct_Rub_Instruction(char* jmpdispatcher, int index, int nm
 	l_jmptbl.addr = temp_basic.addr;
 	m_jmptbl.push_back(l_jmptbl);//把地址记录到跳转表里
 	// int srandnum = SrandNum(6, 18);
-	int srandnum = 1;
+	/*int srandnum = 1;
 	for (int i = 0; i < srandnum; i++)
 	{
 		rubstr = ProduceRubbishOpecode(m_reg04, m_reg05);
 		XEParseIns(rubstr.GetString());
-	}
+	}*/
 	if (nmatch)
 	{
 		temp_basic.nmatch = nmatch;
@@ -171,7 +171,7 @@ void VMLoader2::Construct_Rub_Instruction(char* jmpdispatcher, int index, int nm
 void VMLoader2::Construct_Rub_Instruction_Num(char* jmpdispatcher, int index)
 {
 	//int srandnum = SrandNum(5, 8);
-	int srandnum =5;
+	int srandnum =1;
 	for (int i = 0; i < srandnum; i++)
 	{
 		Construct_Rub_Instruction(jmpdispatcher, index);
@@ -224,21 +224,21 @@ void VMLoader2::Construct_BasicBlock_Instruction(char* instruction, char* jmpdis
 	l_jmptbl.addr = tempaddr;
 	m_jmptbl.push_back(l_jmptbl);
 
-	for (int i = 0; i < 3; i++)
+	/*for (int i = 0; i < 3; i++)
 	{
 		rubstr = ProduceRubbishOpecode(m_reg04, m_reg05);
 		XEParseIns(rubstr.GetString());
-	}
+	}*/
 
 	XEParseIns(instruction);
 
-	for (int i = 0; i < 3; i++)
+	/*for (int i = 0; i < 3; i++)
 	{
 		rubstr = ProduceRubbishOpecode(m_reg04, m_reg05);
 		XEParseIns(rubstr.GetString());
-	}
-	temp_basic.nmatch = tempaddr;
-	XEParseIns((char*)"add esi,4");
+	}*/
+	//temp_basic.nmatch = tempaddr;
+	//XEParseIns((char*)"add esi,4");
 	XEParseIns(jmpdispatcher);
 }
 
@@ -342,11 +342,14 @@ void VMLoader2::Const_BasicAndRub_Block(char* instruction, int index)
 	char jccstr[] = "jge 0x66666666";
 	//char jccstr[] = "mov eax,ebx";
 	//1、垃圾块
-	Construct_Rub_Instruction_Num(jmpdispatcher.GetString(), index);
+	//Construct_Rub_Instruction_Num(jmpdispatcher.GetString(), index);
 	
 	//2、JCC块(基本块一)
-	Construct_Jcc_Instruction(jccstr, index);
-
+	//Construct_Jcc_Instruction(jccstr, index);
+	/*temp_basic.index = -1;
+	temp_basic.addr = 0;
+	temp_basic.nmatch = 0;
+	memset(temp_basic.instruction, 0, STRUCTIONLENGTH);*/
 	//3、垃圾块
 	Construct_Rub_Instruction_Num(jmpdispatcher.GetString(), index);
 
@@ -354,18 +357,18 @@ void VMLoader2::Const_BasicAndRub_Block(char* instruction, int index)
 	Construct_BasicBlock_Instruction(instruction, jmpdispatcher.GetString(), 2);
 
 	//5、垃圾块
-	Construct_Rub_Instruction_Num(jmpdispatcher.GetString(), index);
-	Construct_Rub_Instruction_Num(jmpdispatcher.GetString(), index);
-	//6、基本块三
-	Construct_BasicBlock_Instruction(instruction, jmpdispatcher.GetString(), 3);
+	//Construct_Rub_Instruction_Num(jmpdispatcher.GetString(), index);
+	//Construct_Rub_Instruction_Num(jmpdispatcher.GetString(), index);
+	////6、基本块三
+	//Construct_BasicBlock_Instruction(instruction, jmpdispatcher.GetString(), 3);
 
-	//7、垃圾块
-	Construct_Rub_Instruction_Num(jmpdispatcher.GetString(), index);
+	////7、垃圾块
+	//Construct_Rub_Instruction_Num(jmpdispatcher.GetString(), index);
 
 
 
 	//8、修复m_basic链表里数据
-	Modify_BasicData();
+	//Modify_BasicData();
 	//9、把m_basic存放的指令放到缓存里
 	SaveInstructionToBuffer();
 	//10、清空m_basic链表数据
