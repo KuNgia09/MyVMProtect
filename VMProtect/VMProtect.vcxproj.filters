@@ -101,6 +101,9 @@
     <ClInclude Include="XEDParse.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="WProtectSDK.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="VMProtect.rc">
