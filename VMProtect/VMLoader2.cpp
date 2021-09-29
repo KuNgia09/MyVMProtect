@@ -2,6 +2,7 @@
 #include "vmtest.h"
 #include "vmserv.h"
 #include "../Stub/Stub/Stub.h"
+#include "WProtectSDK.h"
 
 extern VMTable vmtable32[VMTABLEMAXLEN];
 extern VMPStruct g_vmstruct;
@@ -109,26 +110,7 @@ int VMLoader2::VMLength()
 //解析指令并把指令存放到m_basic链表
 void VMLoader2::XEParseIns(char* str)
 {
-	/*_asm {
-		_emit 0xeb
-		_emit 0x0f
-		_emit 0x57
-		_emit 0x50
-		_emit 0x72
-		_emit 0x6f
-		_emit 0x74
-		_emit 0x65
-		_emit 0x63
-		_emit 0x74
-		_emit 0x20
-		_emit 0x42
-		_emit 0x65
-		_emit 0x67
-		_emit 0x69
-		_emit 0x6e
-		_emit 0x00
-
-	}*/
+	//WProtectBegin();
 	XEDPARSE xed = { 0 };
 	xed.x64 = false;//是否是64位
 	xed.cip = (ULONGLONG)m_vmps.vmstartaddr + m_szcalc;
@@ -151,24 +133,7 @@ void VMLoader2::XEParseIns(char* str)
 	temp_basic.addr = 0;
 	temp_basic.nmatch = 0;
 	memset(temp_basic.instruction, 0, STRUCTIONLENGTH);
-	/*_asm {
-		_emit 0xeb
-		_emit 0x0d
-		_emit 0x57
-		_emit 0x50
-		_emit 0x72
-		_emit 0x6f
-		_emit 0x74
-		_emit 0x65
-		_emit 0x63
-		_emit 0x74
-		_emit 0x20
-		_emit 0x45
-		_emit 0x6e
-		_emit 0x64
-		_emit 0x00
-
-	}*/
+	//WProtectEnd();
 }
 
 //垃圾块
@@ -434,26 +399,7 @@ bool VMLoader2::IsAnalysis(char* str)
 //解决不能分割指令的问题
 void VMLoader2::ColdTreatment(char* str)
 {
-	_asm {
-		_emit 0xeb
-		_emit 0x0f
-		_emit 0x57
-		_emit 0x50
-		_emit 0x72
-		_emit 0x6f
-		_emit 0x74
-		_emit 0x65
-		_emit 0x63
-		_emit 0x74
-		_emit 0x20
-		_emit 0x42
-		_emit 0x65
-		_emit 0x67
-		_emit 0x69
-		_emit 0x6e
-		_emit 0x00
-
-	}
+	WProtectBegin();
 	CString cstr = str;
 	int ncalc = cstr.LeftFindChar(str, '-');
 	cstr = cstr.MidCut(1, cstr.GetCount());
@@ -478,24 +424,7 @@ void VMLoader2::ColdTreatment(char* str)
 	SaveInstructionToBuffer();
 	//清空m_basic链表
 	m_basic.clear();
-	_asm {
-		_emit 0xeb
-		_emit 0x0d
-		_emit 0x57
-		_emit 0x50
-		_emit 0x72
-		_emit 0x6f
-		_emit 0x74
-		_emit 0x65
-		_emit 0x63
-		_emit 0x74
-		_emit 0x20
-		_emit 0x45
-		_emit 0x6e
-		_emit 0x64
-		_emit 0x00
-
-	}
+	WProtectEnd();
 }
 
 

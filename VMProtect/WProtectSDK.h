@@ -4,26 +4,47 @@
 #endif
 
 #ifdef _MSC_VER
-//_asm {
-//	_emit 0xeb
-//	_emit 0x0f
-//	_emit 0x57
-//	_emit 0x50
-//	_emit 0x72
-//	_emit 0x6f
-//	_emit 0x74
-//	_emit 0x65
-//	_emit 0x63
-//	_emit 0x74
-//	_emit 0x20
-//	_emit 0x42
-//	_emit 0x65
-//	_emit 0x67
-//	_emit 0x69
-//	_emit 0x6e
-//	_emit 0x00
-//
-//}
+#ifdef  __GNUC__
+#define WProtectBegin() __asm__(".byte 0xEB\n\t.byte 0xf\n\t.string \"WProtect Begin\"\n\t");   
+#define WProtectEnd() __asm__(".byte 0xEB\n\t.byte 0xd\n\t.string \"WProtect End\"\n\t"); 
+#endif
+
+#ifdef _MSC_VER           //by kido 
+#define WProtectBegin() \
+	__asm __emit 0xEB \
+	__asm __emit 0x0F \
+	__asm __emit 'W'  \
+	__asm __emit 'P'  \
+	__asm __emit 'r'  \
+	__asm __emit 'o'  \
+	__asm __emit 't'  \
+	__asm __emit 'e'  \
+	__asm __emit 'c'  \
+	__asm __emit 't'  \
+	__asm __emit ' '  \
+	__asm __emit 'B'  \
+	__asm __emit 'e'  \
+	__asm __emit 'g'  \
+	__asm __emit 'i'  \
+	__asm __emit 'n'  \
+	__asm __emit 00  
+#define WProtectEnd() \
+	__asm __emit 0xEB \
+	__asm __emit 0x0D \
+	__asm __emit 'W'  \
+	__asm __emit 'P'  \
+	__asm __emit 'r'  \
+	__asm __emit 'o'  \
+	__asm __emit 't'  \
+	__asm __emit 'e'  \
+	__asm __emit 'c'  \
+	__asm __emit 't'  \
+	__asm __emit ' '  \
+	__asm __emit 'E'  \
+	__asm __emit 'n'  \
+	__asm __emit 'd'  \
+	__asm __emit 00  
+#endif                  
 
 
 #endif
